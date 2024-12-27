@@ -28,5 +28,6 @@ typedef struct
 } chip8_t;
 
 void chip8_init(chip8_t *chip8, const char *filename);
+void load_font(chip8_t *chip8);
 
 #endif
