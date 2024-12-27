@@ -1,15 +1,35 @@
 #include "emulator.h"
 
-void chip8_init(chip8_t *chip8, const char *filename)
+void chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
 {
+    memset(chip8, 0, sizeof(chip8_t));
     const uint8_t entry_point = 0x200; // CHIP-8 programs start at 0x200
-    unsigned int datasize = 0;
-    unsigned char file = LoadFileData(filename, &datasize);
-    if (file != NULL)
+
+    chip8->pc = entry_point;
+
+    unsigned int data_size = 0;
+    unsigned char *file = LoadFileData(filename, &data_size);
+
+    if (file == NULL)
     {
-        memcpy(chip8->memory[entry_point], file, datasize);
-        UnloadFileData(file);
+        TraceLog(LOG_ERROR, "Failed to load file: %s", filename);
     }
+
+    if (data_size > (sizeof(chip8->memory) - entry_point))
+    {
+        TraceLog(LOG_ERROR, "File too large: %s", filename);
+        UnloadFileData(file);
+        return;
+    }
+
+    memcpy(&chip8->memory[entry_point], file, data_size);
+
+    rom->rom_name = strdup(filename);
+    rom->rom_size = data_size;
+
+    chip8->state = RUNNING;
+
+    UnloadFileData(file);
 }
 
 void load_font(chip8_t *chip8)
@@ -33,5 +53,5 @@ void load_font(chip8_t *chip8)
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    memcpy(chip8->memory[0], font, sizeof(font));
+    memcpy(&chip8->memory[0], font, sizeof(font));
 }
