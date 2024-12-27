@@ -1,9 +1,10 @@
 #include "emulator.h"
 
-void chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
+bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
 {
+    TraceLog(LOG_INFO, "Initializing CHIP-8 emulator");
     memset(chip8, 0, sizeof(chip8_t));
-    const uint8_t entry_point = 0x200; // CHIP-8 programs start at 0x200
+    const uint32_t entry_point = 0x200; // CHIP-8 programs start at 0x200
 
     chip8->pc = entry_point;
 
@@ -13,23 +14,26 @@ void chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
     if (file == NULL)
     {
         TraceLog(LOG_ERROR, "Failed to load file: %s", filename);
+        return false;
     }
 
     if (data_size > (sizeof(chip8->memory) - entry_point))
     {
         TraceLog(LOG_ERROR, "File too large: %s", filename);
         UnloadFileData(file);
-        return;
+        return false;
     }
 
     memcpy(&chip8->memory[entry_point], file, data_size);
+    UnloadFileData(file);
 
     rom->rom_name = strdup(filename);
     rom->rom_size = data_size;
 
     chip8->state = RUNNING;
 
-    UnloadFileData(file);
+    TraceLog(LOG_INFO, "CHIP-8 emulator initialized");
+    return true;
 }
 
 void load_font(chip8_t *chip8)
@@ -54,4 +58,25 @@ void load_font(chip8_t *chip8)
     };
 
     memcpy(&chip8->memory[0], font, sizeof(font));
+}
+
+void action_key(chip8_t *chip8)
+{
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        chip8->state = QUIT;
+    }
+
+    if (IsKeyPressed(KEY_SPACE))
+    {
+        if (chip8->state == PAUSED)
+        {
+            chip8->state = RUNNING;
+        }
+        else
+        {
+            chip8->state = PAUSED;
+            TraceLog(LOG_INFO, "Paused");
+        }
+    }
 }

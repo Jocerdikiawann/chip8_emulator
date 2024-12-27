@@ -36,7 +36,8 @@ typedef struct
     emultaor_state_t state;
 } chip8_t;
 
-void chip8_init(chip8_t *chip8, rom_t *rom, const char *filename);
+bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename);
 void load_font(chip8_t *chip8);
+void action_key(chip8_t *chip8);
 
 #endif

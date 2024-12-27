@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "emulator.h"
 
 #include "resource_dir.h"
 
@@ -17,22 +18,28 @@ int main()
 
 	SearchAndSetResourceDir("resources");
 
-	Texture wabbit = LoadTexture("wabbit_alpha.png");
+	chip8_t chip8;
+	rom_t rom;
+	if (!chip8_init(&chip8, &rom, "ibm.ch8"))
+	{
+		CloseWindow();
+		return 1;
+	}
 
-	while (!WindowShouldClose())
+	while (chip8.state != QUIT)
 	{
 		BeginDrawing();
+
+		action_key(&chip8);
+
+		if(chip8.state == PAUSED) continue;
 
 		ClearBackground(BLACK);
 
 		DrawText("Hello Raylib", 200, 200, 20, WHITE);
 
-		DrawTexture(wabbit, 400, 200, WHITE);
-
 		EndDrawing();
 	}
-
-	UnloadTexture(wabbit);
 
 	CloseWindow();
 	return 0;
