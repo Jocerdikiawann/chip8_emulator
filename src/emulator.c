@@ -94,57 +94,42 @@ void emulator_instruction_cycle(chip8_t *chip8)
 
     switch ((chip8->instruction.opcode >> 12) & 0x0F)
     {
-    case 0x0000:
-        switch (chip8->instruction.opcode & 0x00FF)
+    case 0x00:
+        if (chip8->instruction.NN == 0xE0)
         {
-        case 0x00E0:
-            chip8->instruction = (emulator_instruction_t){
-                .opcode = chip8->instruction.opcode,
-
-            };
-            break;
-        case 0x00EE:
-            chip8->instruction = (emulator_instruction_t){
-                .opcode = chip8->instruction.opcode,
-
-            };
-            break;
-        default:
-            chip8->instruction = (emulator_instruction_t){
-                .opcode = chip8->instruction.opcode,
-            };
-            break;
+            // Clear the display
+            memset(chip8->display_resolution, 0, sizeof(chip8->display_resolution));
+        }
+        else if (chip8->instruction.NN == 0xEE)
+        {
+            // Return from a subroutine
+            chip8->sp--;
+            chip8->pc = chip8->stack[chip8->sp];
         }
         break;
-    case 0x1000:
-        chip8->instruction = (emulator_instruction_t){
-            .opcode = chip8->instruction.opcode,
-
-        };
+    case 0x01:
+        // Jump to address NNN
+        uint16_t addr = chip8->instruction.opcode & 0x0FFFu;
+        chip8->pc = addr;
         break;
-    case 0x2000:
-        chip8->instruction = (emulator_instruction_t){
-            .opcode = chip8->instruction.opcode,
+    case 0x02:
+        // Call subroutine at NNN
+        uint16_t addr = chip8->instruction.opcode & 0x0FFFu;
+        chip8->stack[chip8->sp] = chip8->pc;
+        ++chip8->sp;
+        chip8->pc = addr;
+        break;
+    case 0x0A:
 
-        };
         break;
     case 0x3000:
-        chip8->instruction = (emulator_instruction_t){
-            .opcode = chip8->instruction.opcode,
 
-        };
         break;
     case 0x4000:
-        chip8->instruction = (emulator_instruction_t){
-            .opcode = chip8->instruction.opcode,
 
-        };
         break;
     case 0x5000:
-        chip8->instruction = (emulator_instruction_t){
-            .opcode = chip8->instruction.opcode,
 
-        };
         break;
     default:
         break;
