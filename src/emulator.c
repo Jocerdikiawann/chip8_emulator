@@ -80,3 +80,73 @@ void action_key(chip8_t *chip8)
         }
     }
 }
+
+void emulator_instruction_cycle(chip8_t *chip8)
+{
+    chip8->instruction.opcode = (chip8->memory[chip8->pc] << 8) | chip8->memory[chip8->pc + 1];
+    chip8->pc += 2;
+
+    chip8->instruction.NNN = chip8->instruction.opcode & 0x0FFF;
+    chip8->instruction.NN = chip8->instruction.opcode & 0x0FF;
+    chip8->instruction.N = chip8->instruction.opcode & 0x0F;
+    chip8->instruction.X = (chip8->instruction.opcode >> 8) & 0x0F;
+    chip8->instruction.Y = (chip8->instruction.opcode >> 4) & 0x0F;
+
+    switch ((chip8->instruction.opcode >> 12) & 0x0F)
+    {
+    case 0x0000:
+        switch (chip8->instruction.opcode & 0x00FF)
+        {
+        case 0x00E0:
+            chip8->instruction = (emulator_instruction_t){
+                .opcode = chip8->instruction.opcode,
+
+            };
+            break;
+        case 0x00EE:
+            chip8->instruction = (emulator_instruction_t){
+                .opcode = chip8->instruction.opcode,
+
+            };
+            break;
+        default:
+            chip8->instruction = (emulator_instruction_t){
+                .opcode = chip8->instruction.opcode,
+            };
+            break;
+        }
+        break;
+    case 0x1000:
+        chip8->instruction = (emulator_instruction_t){
+            .opcode = chip8->instruction.opcode,
+
+        };
+        break;
+    case 0x2000:
+        chip8->instruction = (emulator_instruction_t){
+            .opcode = chip8->instruction.opcode,
+
+        };
+        break;
+    case 0x3000:
+        chip8->instruction = (emulator_instruction_t){
+            .opcode = chip8->instruction.opcode,
+
+        };
+        break;
+    case 0x4000:
+        chip8->instruction = (emulator_instruction_t){
+            .opcode = chip8->instruction.opcode,
+
+        };
+        break;
+    case 0x5000:
+        chip8->instruction = (emulator_instruction_t){
+            .opcode = chip8->instruction.opcode,
+
+        };
+        break;
+    default:
+        break;
+    };
+}
