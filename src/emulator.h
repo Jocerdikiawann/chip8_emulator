@@ -1,11 +1,7 @@
 #ifndef EMULATOR_H
 #define EMULATOR_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include "raylib.h"
+#include "lib.h"
 
 typedef enum
 {
@@ -37,7 +33,7 @@ typedef struct
     uint16_t I;            // index register
     uint16_t pc;           // program counter
     uint16_t stack[16];    // 16 levels of stack
-    uint8_t sp;            // stack pointer
+    uint8_t *sp;           // stack pointer
     uint8_t delay_timer;
     uint8_t sound_timer;
     uint8_t keypad[16];                   // keypad

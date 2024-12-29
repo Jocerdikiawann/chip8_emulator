@@ -103,32 +103,87 @@ void emulator_instruction_cycle(chip8_t *chip8)
         else if (chip8->instruction.NN == 0xEE)
         {
             // Return from a subroutine
-            chip8->sp--;
-            chip8->pc = chip8->stack[chip8->sp];
+            chip8->pc = *--chip8->sp;
         }
         break;
     case 0x01:
         // Jump to address NNN
-        uint16_t addr = chip8->instruction.opcode & 0x0FFFu;
-        chip8->pc = addr;
+        chip8->pc = chip8->instruction.NNN;
         break;
     case 0x02:
         // Call subroutine at NNN
-        uint16_t addr = chip8->instruction.opcode & 0x0FFFu;
-        chip8->stack[chip8->sp] = chip8->pc;
-        ++chip8->sp;
-        chip8->pc = addr;
+        *chip8->sp++ = chip8->pc;
+        chip8->pc = chip8->instruction.NNN;
+        break;
+    case 0x03:
+        // Set register X to NN
+        chip8->registers[chip8->instruction.X] = chip8->instruction.NN;
+        break;
+    case 0x04:
+        // chip8->I = chip8->instruction.NNN;
+        break;
+    case 0x05:
+
+        break;
+    case 0x06:
+        chip8->registers[chip8->instruction.X] = chip8->instruction.NN;
+        break;
+    case 0x07:
+        chip8->registers[chip8->instruction.X] += chip8->instruction.NN;
+        break;
+    case 0x08:
+
+        break;
+    case 0x09:
+
         break;
     case 0x0A:
+        chip8->I = chip8->instruction.NNN;
+        break;
+    case 0x0B:
 
         break;
-    case 0x3000:
+    case 0x0C:
 
         break;
-    case 0x4000:
+    case 0x0D:
+        int video_width = 64;
+        int video_height = 32;
+
+        uint8_t x_pos = chip8->registers[chip8->instruction.X] % video_width;
+        uint8_t y_pos = chip8->registers[chip8->instruction.Y] % video_height;
+
+        // VF
+        chip8->registers[0xF] = 0;
+
+        for (size_t row = 0; row < chip8->instruction.N; ++row)
+        {
+            if (y_pos + row >= video_height)
+                break;
+
+            uint8_t sprite_byte = chip8->memory[chip8->I + row];
+            for (size_t col = 0; col < 8; ++col)
+            {
+                if (x_pos + col >= video_width)
+                    break;
+                uint8_t sprite_pixel = sprite_byte & (0x80 >> col);
+                if (sprite_pixel)
+                {
+                    size_t display_pixel_index = (y_pos + row) * video_width + (x_pos + col);
+                    if (chip8->display_resolution[display_pixel_index] == 1)
+                    {
+                        chip8->registers[0xF] = 1;
+                    }
+
+                    chip8->display_resolution[display_pixel_index] ^= 1;
+                }
+            }
+        }
+        break;
+    case 0x0E:
 
         break;
-    case 0x5000:
+    case 0x0F:
 
         break;
     default:

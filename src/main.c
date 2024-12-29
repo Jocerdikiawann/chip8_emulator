@@ -1,20 +1,12 @@
-#include "raylib.h"
+#include "lib.h"
+#include "render.h"
 #include "emulator.h"
 
 #include "resource_dir.h"
 
 int main()
 {
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-
-	int display = GetCurrentMonitor(), full_width = GetMonitorWidth(display),
-		full_height = GetMonitorHeight(display);
-
-	int factor = 70;
-	full_width = factor * 16;
-	full_height = factor * 9;
-
-	InitWindow(full_width, full_height, "Hello Raylib");
+	init_display();
 
 	SearchAndSetResourceDir("resources");
 
@@ -29,18 +21,20 @@ int main()
 	while (chip8.state != QUIT)
 	{
 		BeginDrawing();
+		ClearBackground(BLACK);
 
 		action_key(&chip8);
 
-		if(chip8.state == PAUSED) continue;
+		if (chip8.state == PAUSED)
+			continue;
 
-		ClearBackground(BLACK);
+		emulator_instruction_cycle(&chip8);
 
-		DrawText("Hello Raylib", 200, 200, 20, WHITE);
-
+		render_display(&chip8);
 		EndDrawing();
 	}
 
+	free(rom.rom_name);
 	CloseWindow();
 	return 0;
 }
