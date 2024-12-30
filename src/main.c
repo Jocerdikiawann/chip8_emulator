@@ -12,7 +12,7 @@ int main()
 
 	chip8_t chip8;
 	rom_t rom;
-	if (!chip8_init(&chip8, &rom, "ibm.ch8"))
+	if (!chip8_init(&chip8, &rom, "test_opcode.ch8"))
 	{
 		CloseWindow();
 		return 1;

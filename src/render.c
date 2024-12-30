@@ -2,11 +2,11 @@
 
 void init_display()
 {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
     int display = GetCurrentMonitor(), full_width = GetMonitorWidth(display),
         full_height = GetMonitorHeight(display);
 
-    int factor = 70;
+    int factor = 60;
     full_width = factor * 16;
     full_height = factor * 9;
 
@@ -46,7 +46,7 @@ void render_display(chip8_t *chip8)
     {
         for (int x = 0; x < CHIP8_WIDTH; ++x)
         {
-            if (chip8->display_resolution[y * CHIP8_WIDTH + x])
+            if (chip8->video[y * CHIP8_WIDTH + x])
             {
                 DrawRectangle(
                     offset_x + (x * pixel_width),
@@ -54,6 +54,13 @@ void render_display(chip8_t *chip8)
                     ceil(pixel_width),
                     ceil(pixel_height),
                     WHITE);
+
+                DrawRectangleLines(
+                    offset_x + (x * pixel_width),
+                    offset_y + (y * pixel_height),
+                    ceil(pixel_width),
+                    ceil(pixel_height),
+                    BLACK);
             }
         }
     }

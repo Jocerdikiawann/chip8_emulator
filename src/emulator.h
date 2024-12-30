@@ -33,11 +33,11 @@ typedef struct
     uint16_t I;            // index register
     uint16_t pc;           // program counter
     uint16_t stack[16];    // 16 levels of stack
-    uint8_t *sp;           // stack pointer
+    uint16_t *sp;          // stack pointer
     uint8_t delay_timer;
     uint8_t sound_timer;
-    uint8_t keypad[16];                   // keypad
-    uint32_t display_resolution[64 * 32]; // original display resolution CHIP8 is 64x32 pixels
+    uint8_t keypad[16];      // keypad
+    uint32_t video[64 * 32]; // original display resolution CHIP8 is 64x32 pixels
     emulator_instruction_t instruction;
     emultaor_state_t state;
 } chip8_t;
