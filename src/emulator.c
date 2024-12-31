@@ -36,6 +36,35 @@ bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
     return true;
 }
 
+void audio_init(chip8_t *chip8)
+{
+    InitAudioDevice();
+    const unsigned int sample_rate = 44100;
+    const unsigned int seconds = 1;
+
+    Wave wave = {0};
+
+    wave.frameCount = sample_rate * seconds;
+    wave.sampleRate = sample_rate;
+    wave.sampleSize = 16;
+    wave.channels = 1;
+
+    wave.data = malloc(wave.frameCount * sizeof(short));
+    short *samples = (short *)wave.data;
+
+    const float freq = 440.0f;
+    const float period = sample_rate / freq;
+
+    for (unsigned int i = 0; i < wave.frameCount; ++i)
+    {
+        samples[i] = (i % (int)period) < period / 2 ? SHRT_MAX : SHRT_MIN;
+    }
+
+    chip8->beep = LoadSoundFromWave(wave);
+    UnloadWave(wave);
+    chip8->sound_playing = false;
+}
+
 void load_font(chip8_t *chip8)
 {
     const uint8_t font[] = {
@@ -185,25 +214,6 @@ void action_key(chip8_t *chip8)
         chip8->keypad[0xF] = 0;
 }
 
-void printf_debug(chip8_t *chip8)
-{
-    printf("Address: 0x%04X, Opcode: 0x%04X Desc: ",
-           chip8->pc - 2, chip8->instruction.opcode);
-
-    switch ((chip8->instruction.opcode >> 12) & 0x0F)
-    {
-    case 0x0D:
-        printf("Draw N (%u) height sprite at coords V%X (0x%02X), V%X (0x%02X) "
-               "from memory location I (0x%04X). Set VF = 1 if any pixels are turned off.\n",
-               chip8->instruction.N, chip8->instruction.X, chip8->registers[chip8->instruction.X], chip8->instruction.Y,
-               chip8->registers[chip8->instruction.Y], chip8->I);
-        break;
-    default:
-        printf("Unknown opcode\n");
-        break;
-    }
-}
-
 void emulator_instruction_cycle(chip8_t *chip8)
 {
     chip8->instruction.opcode = (chip8->memory[chip8->pc] << 8) | chip8->memory[chip8->pc + 1];
@@ -214,10 +224,6 @@ void emulator_instruction_cycle(chip8_t *chip8)
     chip8->instruction.N = chip8->instruction.opcode & 0x0F;
     chip8->instruction.X = (chip8->instruction.opcode >> 8) & 0x0F;
     chip8->instruction.Y = (chip8->instruction.opcode >> 4) & 0x0F;
-
-    // #ifdef DEBUG
-    // printf_debug(chip8);
-    // #endif
 
     switch ((chip8->instruction.opcode >> 12) & 0x0F)
     {
@@ -440,6 +446,17 @@ void update_timers(chip8_t *chip8)
 
     if (chip8->sound_timer > 0)
     {
+        if (!chip8->sound_playing)
+        {
+            PlaySound(chip8->beep);
+            chip8->sound_playing = true;
+        }
+
         chip8->sound_timer--;
+    }
+    else if (chip8->sound_playing)
+    {
+        StopSound(chip8->beep);
+        chip8->sound_playing = false;
     }
 }

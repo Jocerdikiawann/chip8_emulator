@@ -12,11 +12,13 @@ int main()
 
 	chip8_t chip8;
 	rom_t rom;
-	if (!chip8_init(&chip8, &rom, "test_opcode.ch8"))
+	if (!chip8_init(&chip8, &rom, "brick.ch8"))
 	{
 		CloseWindow();
 		return 1;
 	}
+
+	audio_init(&chip8);
 
 	while (chip8.state != QUIT)
 	{
@@ -39,6 +41,8 @@ int main()
 		EndDrawing();
 	}
 
+	UnloadSound(chip8.beep);
+	CloseAudioDevice();
 	free(rom.rom_name);
 	CloseWindow();
 	return 0;
