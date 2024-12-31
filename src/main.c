@@ -28,9 +28,14 @@ int main()
 		if (chip8.state == PAUSED)
 			continue;
 
-		emulator_instruction_cycle(&chip8);
+		const int INSTRUCTION_PER_FRAME = 700 / 60;
+		for (int i = 0; i < INSTRUCTION_PER_FRAME; ++i)
+		{
+			emulator_instruction_cycle(&chip8);
+		}
 
 		render_display(&chip8);
+		update_timers(&chip8);
 		EndDrawing();
 	}
 

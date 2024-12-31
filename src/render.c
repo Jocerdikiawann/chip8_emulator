@@ -6,7 +6,7 @@ void init_display()
     int display = GetCurrentMonitor(), full_width = GetMonitorWidth(display),
         full_height = GetMonitorHeight(display);
 
-    int factor = 60;
+    int factor = 50;
     full_width = factor * 16;
     full_height = factor * 9;
 

@@ -64,20 +64,143 @@ void action_key(chip8_t *chip8)
 {
     if (IsKeyPressed(KEY_ESCAPE))
     {
+        TraceLog(LOG_INFO, "ESCAPE pressed, quitting");
         chip8->state = QUIT;
     }
 
-    if (IsKeyPressed(KEY_SPACE))
+    if (IsKeyPressed(KEY_P))
     {
-        if (chip8->state == PAUSED)
-        {
-            chip8->state = RUNNING;
-        }
-        else
-        {
-            chip8->state = PAUSED;
-            TraceLog(LOG_INFO, "Paused");
-        }
+        chip8->state = PAUSED;
+    }
+
+    if (IsKeyPressed(KEY_R))
+    {
+        chip8->state = RUNNING;
+    }
+
+    // CHIP-8 keypad layout
+    // 1 2 3 C
+    if (IsKeyDown(KEY_ONE))
+        chip8->keypad[0x1] = 1;
+
+    if (IsKeyDown(KEY_TWO))
+        chip8->keypad[0x2] = 1;
+
+    if (IsKeyDown(KEY_THREE))
+        chip8->keypad[0x3] = 1;
+
+    if (IsKeyDown(KEY_FOUR))
+        chip8->keypad[0xC] = 1;
+
+    // 4 5 6 D
+    if (IsKeyDown(KEY_Q))
+        chip8->keypad[0x4] = 1;
+
+    if (IsKeyDown(KEY_W))
+        chip8->keypad[0x5] = 1;
+
+    if (IsKeyDown(KEY_E))
+        chip8->keypad[0x6] = 1;
+
+    if (IsKeyDown(KEY_R))
+        chip8->keypad[0xD] = 1;
+
+    // 7 8 9 E
+    if (IsKeyDown(KEY_A))
+        chip8->keypad[0x7] = 1;
+
+    if (IsKeyDown(KEY_S))
+        chip8->keypad[0x8] = 1;
+
+    if (IsKeyDown(KEY_D))
+        chip8->keypad[0x9] = 1;
+
+    if (IsKeyDown(KEY_F))
+        chip8->keypad[0xE] = 1;
+
+    // A 0 B F
+    if (IsKeyDown(KEY_Z))
+        chip8->keypad[0xA] = 1;
+
+    if (IsKeyDown(KEY_X))
+        chip8->keypad[0x0] = 1;
+
+    if (IsKeyDown(KEY_C))
+        chip8->keypad[0xB] = 1;
+
+    if (IsKeyDown(KEY_V))
+        chip8->keypad[0xF] = 1;
+
+    // CHIP-8 keypad layout
+    // 1 2 3 C
+    if (IsKeyUp(KEY_ONE))
+        chip8->keypad[0x1] = 0;
+
+    if (IsKeyUp(KEY_TWO))
+        chip8->keypad[0x2] = 0;
+
+    if (IsKeyUp(KEY_THREE))
+        chip8->keypad[0x3] = 0;
+
+    if (IsKeyUp(KEY_FOUR))
+        chip8->keypad[0xC] = 0;
+
+    // 4 5 6 D
+    if (IsKeyUp(KEY_Q))
+        chip8->keypad[0x4] = 0;
+
+    if (IsKeyUp(KEY_W))
+        chip8->keypad[0x5] = 0;
+
+    if (IsKeyUp(KEY_E))
+        chip8->keypad[0x6] = 0;
+
+    if (IsKeyUp(KEY_R))
+        chip8->keypad[0xD] = 0;
+
+    // 7 8 9 E
+    if (IsKeyUp(KEY_A))
+        chip8->keypad[0x7] = 0;
+
+    if (IsKeyUp(KEY_S))
+        chip8->keypad[0x8] = 0;
+
+    if (IsKeyUp(KEY_D))
+        chip8->keypad[0x9] = 0;
+
+    if (IsKeyUp(KEY_F))
+        chip8->keypad[0xE] = 0;
+
+    // A 0 B F
+    if (IsKeyUp(KEY_Z))
+        chip8->keypad[0xA] = 0;
+
+    if (IsKeyUp(KEY_X))
+        chip8->keypad[0x0] = 0;
+
+    if (IsKeyUp(KEY_C))
+        chip8->keypad[0xB] = 0;
+
+    if (IsKeyUp(KEY_V))
+        chip8->keypad[0xF] = 0;
+}
+
+void printf_debug(chip8_t *chip8)
+{
+    printf("Address: 0x%04X, Opcode: 0x%04X Desc: ",
+           chip8->pc - 2, chip8->instruction.opcode);
+
+    switch ((chip8->instruction.opcode >> 12) & 0x0F)
+    {
+    case 0x0D:
+        printf("Draw N (%u) height sprite at coords V%X (0x%02X), V%X (0x%02X) "
+               "from memory location I (0x%04X). Set VF = 1 if any pixels are turned off.\n",
+               chip8->instruction.N, chip8->instruction.X, chip8->registers[chip8->instruction.X], chip8->instruction.Y,
+               chip8->registers[chip8->instruction.Y], chip8->I);
+        break;
+    default:
+        printf("Unknown opcode\n");
+        break;
     }
 }
 
@@ -91,6 +214,10 @@ void emulator_instruction_cycle(chip8_t *chip8)
     chip8->instruction.N = chip8->instruction.opcode & 0x0F;
     chip8->instruction.X = (chip8->instruction.opcode >> 8) & 0x0F;
     chip8->instruction.Y = (chip8->instruction.opcode >> 4) & 0x0F;
+
+    // #ifdef DEBUG
+    // printf_debug(chip8);
+    // #endif
 
     switch ((chip8->instruction.opcode >> 12) & 0x0F)
     {
@@ -112,8 +239,7 @@ void emulator_instruction_cycle(chip8_t *chip8)
         break;
     case 0x02:
         // Call subroutine at NNN
-        chip8->stack[*chip8->sp] = chip8->pc;
-        *chip8->sp++;
+        *chip8->sp++ = chip8->pc;
         chip8->pc = chip8->instruction.NNN;
         break;
     case 0x03:
@@ -184,7 +310,7 @@ void emulator_instruction_cycle(chip8_t *chip8)
         }
         break;
     case 0x09:
-        if(chip8->registers[chip8->instruction.X] != chip8->registers[chip8->instruction.Y])
+        if (chip8->registers[chip8->instruction.X] != chip8->registers[chip8->instruction.Y])
         {
             chip8->pc += 2;
         }
@@ -235,23 +361,85 @@ void emulator_instruction_cycle(chip8_t *chip8)
     case 0x0E:
         if (chip8->instruction.NN == 0x9E)
         {
-            if (IsKeyDown(chip8->keypad[chip8->registers[chip8->instruction.X]]))
-            {
+            if (chip8->keypad[chip8->registers[chip8->instruction.X]])
                 chip8->pc += 2;
-            }
         }
         else if (chip8->instruction.NN == 0xA1)
         {
-            if (!IsKeyDown(chip8->keypad[chip8->registers[chip8->instruction.X]]))
-            {
+            if (!chip8->keypad[chip8->registers[chip8->instruction.X]])
                 chip8->pc += 2;
-            }
         }
         break;
     case 0x0F:
+        switch (chip8->instruction.NN)
+        {
+        case 0x0A:
+            bool key_pressed = false;
+            for (int i = 0; i < sizeof chip8->keypad; ++i)
+            {
+                if (chip8->keypad[i])
+                {
+                    chip8->registers[chip8->instruction.X] = i;
+                    key_pressed = true;
+                    break;
+                }
+            }
 
+            if (key_pressed)
+                chip8->pc += 2;
+            break;
+        case 0x1E:
+            chip8->I += chip8->registers[chip8->instruction.X];
+            break;
+        case 0x07:
+            chip8->registers[chip8->instruction.X] = chip8->delay_timer;
+            break;
+        case 0x15:
+            chip8->delay_timer = chip8->registers[chip8->instruction.X];
+            break;
+        case 0x18:
+            chip8->sound_timer = chip8->registers[chip8->instruction.X];
+            break;
+        case 0x29:
+            chip8->I = chip8->registers[chip8->instruction.X] * 5;
+            break;
+        case 0x33:
+            chip8->memory[chip8->I] = chip8->registers[chip8->instruction.X] / 100;
+            chip8->memory[chip8->I + 1] = (chip8->registers[chip8->instruction.X] / 10) % 10;
+            chip8->memory[chip8->I + 2] = chip8->registers[chip8->instruction.X] % 10;
+            break;
+        case 0x55:
+            for (int i = 0; i <= chip8->instruction.X; ++i)
+            {
+                chip8->memory[chip8->I + i] = chip8->registers[i];
+            }
+            break;
+        case 0x65:
+            for (int i = 0; i <= chip8->instruction.X; ++i)
+            {
+                chip8->registers[i] = chip8->memory[chip8->I + i];
+            }
+            break;
+        default:
+            TraceLog(LOG_WARNING, "Unknown opcode: 0x0F%X", chip8->instruction.opcode);
+            break;
+        }
         break;
     default:
+        TraceLog(LOG_WARNING, "Unknown opcode: 0x%X", chip8->instruction.opcode);
         break;
     };
+}
+
+void update_timers(chip8_t *chip8)
+{
+    if (chip8->delay_timer > 0)
+    {
+        chip8->delay_timer--;
+    }
+
+    if (chip8->sound_timer > 0)
+    {
+        chip8->sound_timer--;
+    }
 }
