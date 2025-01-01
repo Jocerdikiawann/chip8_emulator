@@ -2,7 +2,32 @@
 #include "render.h"
 #include "emulator.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "resource_dir.h"
+
+chip8_t chip8;
+rom_t rom;
+
+void update_draw_frame(void)
+{
+	BeginDrawing();
+	ClearBackground(BLACK);
+
+	action_key(&chip8);
+
+	const int INSTRUCTION_PER_FRAME = 700 / 60;
+	for (int i = 0; i < INSTRUCTION_PER_FRAME; ++i)
+	{
+		emulator_instruction_cycle(&chip8);
+	}
+
+	render_display(&chip8);
+	update_timers(&chip8);
+	EndDrawing();
+}
 
 int main()
 {
@@ -10,8 +35,6 @@ int main()
 
 	SearchAndSetResourceDir("resources");
 
-	chip8_t chip8;
-	rom_t rom;
 	if (!chip8_init(&chip8, &rom, "brix.ch8"))
 	{
 		CloseWindow();
@@ -21,26 +44,14 @@ int main()
 
 	audio_init(&chip8);
 
+#ifdef PLATFORM_WEB
+	emscripten_set_main_loop(update_draw_frame, 0, 1);
+#else
 	while (chip8.state != QUIT)
 	{
-		BeginDrawing();
-		ClearBackground(BLACK);
-
-		action_key(&chip8);
-
-		if (chip8.state == PAUSED)
-			continue;
-
-		const int INSTRUCTION_PER_FRAME = 700 / 60;
-		for (int i = 0; i < INSTRUCTION_PER_FRAME; ++i)
-		{
-			emulator_instruction_cycle(&chip8);
-		}
-
-		render_display(&chip8);
-		update_timers(&chip8);
-		EndDrawing();
+		update_draw_frame();
 	}
+#endif
 
 	UnloadSound(chip8.beep);
 	CloseAudioDevice();

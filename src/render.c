@@ -6,10 +6,14 @@ void init_display()
     int display = GetCurrentMonitor(), full_width = GetMonitorWidth(display),
         full_height = GetMonitorHeight(display);
 
+#ifdef PLATFORM_WEB
+    full_height -= 250;
+    full_width -= 40;
+#else
     int factor = 50;
     full_width = factor * 16;
     full_height = factor * 9;
-
+#endif
     InitWindow(full_width, full_height, "CHIP-8 Emulator");
 
     SetWindowMinSize(320, 160);

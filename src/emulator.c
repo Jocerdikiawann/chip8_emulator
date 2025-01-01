@@ -57,7 +57,7 @@ void audio_init(chip8_t *chip8)
 
     for (unsigned int i = 0; i < wave.frameCount; ++i)
     {
-        samples[i] = (i % (int)period) < period / 2 ? SHRT_MAX : SHRT_MIN;
+        samples[i] = (i % (int)period) < period / 2 ? 0x7fff : (-0x7fff - 1);
     }
 
     chip8->beep = LoadSoundFromWave(wave);
