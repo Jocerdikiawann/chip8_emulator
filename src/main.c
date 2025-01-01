@@ -2,9 +2,11 @@
 #include "render.h"
 #include "emulator.h"
 
-#ifdef __EMSCRIPTEN__
+#ifdef PLATFORM_WEB
 #include <emscripten.h>
 #endif
+
+#define SUPPORT_MODULE_RAUDIO
 
 #include "resource_dir.h"
 
@@ -47,6 +49,7 @@ int main()
 #ifdef PLATFORM_WEB
 	emscripten_set_main_loop(update_draw_frame, 0, 1);
 #else
+	SetTargetFPS(60);
 	while (chip8.state != QUIT)
 	{
 		update_draw_frame();

@@ -7,8 +7,8 @@ void init_display()
         full_height = GetMonitorHeight(display);
 
 #ifdef PLATFORM_WEB
-    full_height -= 250;
-    full_width -= 40;
+    full_height -= 300;
+    full_width -= 60;
 #else
     int factor = 50;
     full_width = factor * 16;
@@ -17,7 +17,6 @@ void init_display()
     InitWindow(full_width, full_height, "CHIP-8 Emulator");
 
     SetWindowMinSize(320, 160);
-    SetTargetFPS(60);
 }
 
 void render_display(chip8_t *chip8)
