@@ -401,4 +401,8 @@ raylib-master
 Makefile
 /*.sln
 resources/*.ch8
-web/
+
+web/*.html
+web/*.js
+web/*.data
+web/*.wasm
