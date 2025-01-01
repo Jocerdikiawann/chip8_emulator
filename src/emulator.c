@@ -86,7 +86,7 @@ void load_font(chip8_t *chip8)
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    memcpy(&chip8->memory[0], font, sizeof(font));
+    memcpy(&chip8->memory[0x50], font, sizeof(font));
 }
 
 void action_key(chip8_t *chip8)
@@ -407,7 +407,7 @@ void emulator_instruction_cycle(chip8_t *chip8)
             chip8->sound_timer = chip8->registers[chip8->instruction.X];
             break;
         case 0x29:
-            chip8->I = chip8->registers[chip8->instruction.X] * 5;
+            chip8->I = 0x50 + chip8->registers[chip8->instruction.X] * 5;
             break;
         case 0x33:
             chip8->memory[chip8->I] = chip8->registers[chip8->instruction.X] / 100;

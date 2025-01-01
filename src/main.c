@@ -12,11 +12,12 @@ int main()
 
 	chip8_t chip8;
 	rom_t rom;
-	if (!chip8_init(&chip8, &rom, "brick.ch8"))
+	if (!chip8_init(&chip8, &rom, "brix.ch8"))
 	{
 		CloseWindow();
 		return 1;
 	}
+	load_font(&chip8);
 
 	audio_init(&chip8);
 
