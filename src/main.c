@@ -13,23 +13,7 @@
 chip8_t chip8;
 rom_t rom;
 
-void update_draw_frame(void)
-{
-	BeginDrawing();
-	ClearBackground(BLACK);
-
-	action_key(&chip8);
-
-	const int INSTRUCTION_PER_FRAME = 700 / 60;
-	for (int i = 0; i < INSTRUCTION_PER_FRAME; ++i)
-	{
-		emulator_instruction_cycle(&chip8);
-	}
-
-	render_display(&chip8);
-	update_timers(&chip8);
-	EndDrawing();
-}
+void update_draw_frame(void);
 
 int main()
 {
@@ -37,7 +21,7 @@ int main()
 
 	SearchAndSetResourceDir("resources");
 
-	if (!chip8_init(&chip8, &rom, "brix.ch8"))
+	if (!chip8_init(&chip8, &rom, "tetris.ch8"))
 	{
 		CloseWindow();
 		return 1;
@@ -61,4 +45,25 @@ int main()
 	free(rom.rom_name);
 	CloseWindow();
 	return 0;
+}
+
+void update_draw_frame(void)
+{
+	if (chip8.state == PAUSED)
+		return;
+
+	BeginDrawing();
+	ClearBackground(BLACK);
+
+	action_key(&chip8);
+
+	const int INSTRUCTION_PER_FRAME = 700 / 60;
+	for (int i = 0; i < INSTRUCTION_PER_FRAME; ++i)
+	{
+		emulator_instruction_cycle(&chip8);
+	}
+
+	render_display(&chip8);
+	update_timers(&chip8);
+	EndDrawing();
 }

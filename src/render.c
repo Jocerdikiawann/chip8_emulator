@@ -3,12 +3,11 @@
 void init_display()
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-    int display = GetCurrentMonitor(), full_width = GetMonitorWidth(display),
-        full_height = GetMonitorHeight(display);
+    int full_width, full_height;
 
 #ifdef PLATFORM_WEB
-    full_height -= 300;
-    full_width -= 60;
+    full_height = 800;
+    full_width = 400;
 #else
     int factor = 50;
     full_width = factor * 16;
