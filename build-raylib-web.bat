@@ -23,8 +23,9 @@ emcc -o ./web/main.html ./src/main.c ./src/emulator.c ./src/render.c -Os -Wall -
     -I./build/external/raylib-master/src/ -L. -L./build/external/raylib-master/src/ ^
     -s USE_GLFW=3 --shell-file ./build/external/raylib-master/src/shell.html -DPLATFORM_WEB ^
     --preload-file ./resources/tetris.ch8 --preload-file ./resources/brix.ch8 ^
-    -s ASYNCIFY -s FORCE_FILESYTEM=1 --profiling
+    -s ASYNCIFY -s FORCE_FILESYSTEM=1 --profiling
 
 if %ERRORLEVEL% EQU 0 (
-    start emrun ./web/main.html
+    emrun ./web/main.html
+    pause
 )
