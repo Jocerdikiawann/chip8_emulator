@@ -12,12 +12,20 @@
 
 typedef struct
 {
-    const char *text;
-    Vector2 position;
-    bool is_selected;
+    char *roms;
+    char *roms_name;
 } menu_item_t;
 
+typedef struct
+{
+    menu_item_t *items;
+    size_t count;
+    size_t capacity;
+} menu_t;
+
 void init_display();
+void render_main_menu(menu_t *menu);
+void utility_drag_drop_rom(menu_t *menu);
 void render_display(chip8_t *chip8);
 
 #endif
