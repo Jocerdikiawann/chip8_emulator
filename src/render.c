@@ -51,8 +51,6 @@ void render_main_menu(menu_t *menu)
                 TraceLog(LOG_INFO, "ROM name is NULL at index %d", i);
                 continue;
             }
-            printf("INDEX %d\n", i);
-            printf("Rom name size: %d\n", TextLength(menu->items[i].roms_name));
             char *text = TextFormat("%d. %s", i + 1, menu->items[i].roms_name);
             Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
             Vector2 text_pos = {
@@ -81,6 +79,22 @@ void utility_drag_drop_rom(menu_t *menu)
         return;
     }
 
+    if (menu->count >= menu->capacity)
+    {
+        if (menu->capacity == 0)
+            menu->capacity = dropped_files.count;
+        else
+            menu->capacity += dropped_files.count;
+
+        menu_item_t *new_items = realloc(menu->items, sizeof(menu_item_t) * menu->capacity);
+        if (new_items == NULL)
+        {
+            TraceLog(LOG_ERROR, "Failed to allocate memory for menu items");
+            return;
+        }
+        menu->items = new_items;
+    }
+
     for (size_t i = 0; i < dropped_files.count; ++i)
     {
         char *file_path = strdup(dropped_files.paths[i]);
@@ -91,36 +105,19 @@ void utility_drag_drop_rom(menu_t *menu)
             continue;
         }
 
-        if (menu->count >= menu->capacity)
-        {
-            size_t new_size = sizeof(menu_item_t) * (menu->capacity + dropped_files.count);
-            menu_item_t *new_items = realloc(menu->items, new_size);
-            if (new_items == NULL)
-            {
-                TraceLog(LOG_ERROR, "Failed to reallocate, new buffer capacity: %i", new_size);
-                free(file_path);
-                return;
-            }
-            menu->items = new_items;
-            menu->capacity += dropped_files.count;
-        }
-
-        TraceLog(LOG_INFO, "Current capacity: %d", menu->capacity);
-
         menu->items[menu->count].roms = file_path;
 
         const char *file_name = GetFileName(file_path);
-        TraceLog(LOG_INFO, "Adding ROM %s at index %d", file_name, menu->count);
         if (TextLength(file_name) > 23)
         {
             char *copy_string = malloc(24);
-            strncpy(copy_string, file_name, 24);
-            copy_string[24] = '\0';
-            menu->items[i].roms_name = copy_string;
+            strncpy(copy_string, file_name, 23);
+            copy_string[23] = '\0';
+            menu->items[menu->count].roms_name = copy_string;
         }
         else
         {
-            menu->items[i].roms_name = file_name;
+            menu->items[menu->count].roms_name = file_name;
         }
 
         menu->count++;

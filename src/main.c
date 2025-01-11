@@ -24,11 +24,7 @@ int main()
 	SearchAndSetResourceDir("resources");
 
 	// Load the main menu
-	menu_t main_menu = {
-		.items = NULL,
-		.count = 0,
-		.capacity = 0,
-	};
+	menu_t main_menu = {0};
 
 	while (!WindowShouldClose())
 	{
