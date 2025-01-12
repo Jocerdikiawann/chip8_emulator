@@ -1,5 +1,25 @@
 #include "render.h"
 
+void action_select_menu(menu_t *menu)
+{
+    for (size_t i = 0; i < menu->count; ++i)
+    {
+        menu->items[i].is_selected = false;
+    }
+
+    if (IsKeyPressed(KEY_DOWN))
+    {
+        menu->current_selected_item_index = (menu->current_selected_item_index + 1) % menu->count;
+    }
+
+    if (IsKeyPressed(KEY_UP))
+    {
+        menu->current_selected_item_index = (menu->current_selected_item_index - 1 + menu->count) % menu->count;
+    }
+
+    menu->items[menu->current_selected_item_index].is_selected = true;
+}
+
 void init_display()
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -18,7 +38,7 @@ void init_display()
     SetWindowMinSize(320, 160);
 }
 
-void render_main_menu(menu_t *menu)
+void render_main_menu(menu_t *menu, chip8_t *chip8)
 {
     Vector2 pos_box = {
         .x = GetScreenWidth() * 0.5f,
@@ -44,6 +64,7 @@ void render_main_menu(menu_t *menu)
 
     if (menu->count != 0)
     {
+        action_select_menu(menu);
         for (size_t i = 0; i < menu->count; i++)
         {
             if (menu->items[i].roms_name == NULL)
@@ -57,7 +78,16 @@ void render_main_menu(menu_t *menu)
                 .x = pos_box.x - text_size.x * 0.5f,
                 .y = pos_box.y - box_height * 0.5f + 20 + (i * 40),
             };
-            DrawText(text, text_pos.x, text_pos.y, 20, RAYWHITE);
+            menu->items[i].position = text_pos;
+            Color text_color = menu->items[i].is_selected ? RED : RAYWHITE;
+            DrawText(text, text_pos.x, text_pos.y, 20, text_color);
+
+            // started chip8
+            if (IsKeyPressed(KEY_ENTER) && menu->items[i].is_selected)
+            {
+                chip8->state = STARTED;
+                menu->state = EMULATOR;
+            }
         }
     }
 }

@@ -7,14 +7,10 @@ typedef enum
 {
     QUIT,
     RUNNING,
-    PAUSED
+    NOT_INITIALIZED,
+    PAUSED,
+    STARTED,
 } emultaor_state_t;
-
-typedef struct
-{
-    char *rom_name;
-    unsigned int rom_size;
-} rom_t;
 
 typedef struct
 {
@@ -44,7 +40,7 @@ typedef struct
     bool sound_playing;
 } chip8_t;
 
-bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename);
+bool chip8_init(chip8_t *chip8, const char *filename);
 void audio_init(chip8_t *chip8);
 void load_font(chip8_t *chip8);
 void action_key(chip8_t *chip8);

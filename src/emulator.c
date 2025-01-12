@@ -1,6 +1,6 @@
 #include "emulator.h"
 
-bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
+bool chip8_init(chip8_t *chip8, const char *filename)
 {
     TraceLog(LOG_INFO, "Initializing CHIP-8 emulator");
     memset(chip8, 0, sizeof(chip8_t));
@@ -28,9 +28,6 @@ bool chip8_init(chip8_t *chip8, rom_t *rom, const char *filename)
     chip8->pc = entry_point;
     chip8->sp = &chip8->stack[0];
     chip8->state = RUNNING;
-
-    rom->rom_name = strdup(filename);
-    rom->rom_size = data_size;
 
     TraceLog(LOG_INFO, "CHIP-8 emulator initialized");
     return true;
