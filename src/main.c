@@ -19,7 +19,6 @@ menu_t main_menu = {
 };
 
 // TODO:
-//  - Back to main menu
 //  - Reset games if win or lose
 
 void update_draw_frame(void);
@@ -31,8 +30,10 @@ int main()
 	init_display();
 
 	SearchAndSetResourceDir("resources");
+	InitAudioDevice();
 
 #ifdef PLATFORM_WEB
+	DisableCursor();
 	emscripten_set_main_loop(update_draw_frame, 0, 1);
 #else
 	SetTargetFPS(60);
@@ -70,7 +71,7 @@ void update_draw_frame(void)
 		if (chip8.state == PAUSED)
 			return;
 
-		action_key(&chip8);
+		action_key(&chip8, &main_menu);
 		ClearBackground(BLACK);
 
 		const int INSTRUCTION_PER_FRAME = 700 / 60;

@@ -1,23 +1,29 @@
 #include "render.h"
 
-void action_select_menu(menu_t *menu)
+void action_select_menu(menu_t *menu, chip8_t *chip8)
 {
     for (size_t i = 0; i < menu->count; ++i)
     {
         menu->items[i].is_selected = false;
     }
 
-    if (IsKeyPressed(KEY_DOWN))
+    if (IsKeyPressed(KEY_J))
     {
         menu->current_selected_item_index = (menu->current_selected_item_index + 1) % menu->count;
     }
 
-    if (IsKeyPressed(KEY_UP))
+    if (IsKeyPressed(KEY_K))
     {
         menu->current_selected_item_index = (menu->current_selected_item_index - 1 + menu->count) % menu->count;
     }
 
     menu->items[menu->current_selected_item_index].is_selected = true;
+
+    if (IsKeyPressed(KEY_ENTER) && menu->items[menu->current_selected_item_index].is_selected)
+    {
+        chip8->state = STARTED;
+        menu->state = EMULATOR;
+    }
 }
 
 void init_display()
@@ -64,7 +70,7 @@ void render_main_menu(menu_t *menu, chip8_t *chip8)
 
     if (menu->count != 0)
     {
-        action_select_menu(menu);
+        action_select_menu(menu, chip8);
         for (size_t i = 0; i < menu->count; i++)
         {
             if (menu->items[i].roms_name == NULL)
@@ -81,13 +87,6 @@ void render_main_menu(menu_t *menu, chip8_t *chip8)
             menu->items[i].position = text_pos;
             Color text_color = menu->items[i].is_selected ? RED : RAYWHITE;
             DrawText(text, text_pos.x, text_pos.y, 20, text_color);
-
-            // started chip8
-            if (IsKeyPressed(KEY_ENTER) && menu->items[i].is_selected)
-            {
-                chip8->state = STARTED;
-                menu->state = EMULATOR;
-            }
         }
     }
 }

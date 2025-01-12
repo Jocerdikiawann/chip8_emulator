@@ -1,5 +1,30 @@
 #include "emulator.h"
 
+void clean_up_chip8(chip8_t *chip8)
+{
+    if (chip8 == NULL)
+        return;
+
+    if (IsSoundPlaying(chip8->beep))
+        StopSound(chip8->beep);
+
+    UnloadSound(chip8->beep);
+
+    memset(chip8->registers, 0, sizeof(chip8->registers));
+    memset(chip8->memory, 0, sizeof(chip8->memory));
+    memset(chip8->stack, 0, sizeof(chip8->stack));
+    memset(chip8->keypad, 0, sizeof(chip8->keypad));
+    memset(chip8->video, 0, sizeof(chip8->video));
+
+    chip8->I = 0;
+    chip8->pc = 0;
+    chip8->delay_timer = 0;
+    chip8->sound_timer = 0;
+    chip8->sound_playing = false;
+    chip8->sp = NULL;
+    chip8->state = NOT_INITIALIZED;
+}
+
 bool chip8_init(chip8_t *chip8, const char *filename)
 {
     TraceLog(LOG_INFO, "Initializing CHIP-8 emulator");
@@ -35,7 +60,6 @@ bool chip8_init(chip8_t *chip8, const char *filename)
 
 void audio_init(chip8_t *chip8)
 {
-    InitAudioDevice();
     const unsigned int sample_rate = 44100;
     const unsigned int seconds = 1;
 
@@ -86,7 +110,7 @@ void load_font(chip8_t *chip8)
     memcpy(&chip8->memory[0x50], font, sizeof(font));
 }
 
-void action_key(chip8_t *chip8)
+void action_key(chip8_t *chip8, menu_t *menu)
 {
     if (IsKeyPressed(KEY_ESCAPE))
     {
@@ -102,6 +126,13 @@ void action_key(chip8_t *chip8)
     if (IsKeyPressed(KEY_R))
     {
         chip8->state = RUNNING;
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE))
+    {
+        clean_up_chip8(chip8);
+        menu->state = MAIN_MENU;
+        menu->current_selected_item_index = 0;
     }
 
     // CHIP-8 keypad layout
