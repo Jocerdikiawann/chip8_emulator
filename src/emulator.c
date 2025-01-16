@@ -135,6 +135,18 @@ void action_key(chip8_t *chip8, menu_t *menu)
         menu->current_selected_item_index = 0;
     }
 
+    if (IsKeyPressed(KEY_EQUAL))
+    {
+        clean_up_chip8(chip8);
+        if (!chip8_init(chip8, menu->items[menu->current_selected_item_index].roms))
+        {
+            CloseWindow();
+            return;
+        }
+        load_font(chip8);
+        audio_init(chip8);
+    }
+
     // CHIP-8 keypad layout
     // 1 2 3 C
     if (IsKeyDown(KEY_ONE))
